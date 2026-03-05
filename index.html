@@ -138,11 +138,25 @@
 
         async function carregarNoticias() {
             const grid = document.getElementById('news-grid');
-            try {
-                const resposta = await fetch(URL);
-                const dados = await resposta.json();
+            
+            // 1. A tua URL original
+            const URL_ORIGINAL = `https://gnews.io/api/v4/search?q=astronomia&lang=pt&max=9&apikey=${API_KEY}`;
+            
+            // 2. Envolvemos a URL no serviço AllOrigins para evitar o erro de CORS
+            const URL_COM_PROXY = `https://api.allorigins.win/get?url=${encodeURIComponent(URL_ORIGINAL)}`;
 
-                if (dados.articles) {
+            try {
+                const resposta = await fetch(URL_COM_PROXY);
+                
+                if (!resposta.ok) throw new Error('Erro na rede');
+
+                const dadosProxy = await resposta.json();
+                
+                // O AllOrigins devolve os dados dentro de um campo chamado 'contents' como texto
+                // Precisamos de transformar esse texto em JSON real
+                const dados = JSON.parse(dadosProxy.contents);
+
+                if (dados.articles && dados.articles.length > 0) {
                     grid.innerHTML = '';
                     dados.articles.forEach(artigo => {
                         grid.innerHTML += `
@@ -150,18 +164,20 @@
                                 <img src="${artigo.image}" alt="Notícia">
                                 <div class="card-body">
                                     <h3 style="color:var(--text-color)">${artigo.title}</h3>
-                                    <p style="color:#888">${artigo.description.substring(0, 100)}...</p>
+                                    <p style="color:#888">${artigo.description ? artigo.description.substring(0, 100) : ''}...</p>
                                     <a href="${artigo.url}" target="_blank" class="btn-link">LER MAIS</a>
                                 </div>
                             </div>
                         `;
                     });
+                } else {
+                    grid.innerHTML = '<p>Nenhuma notícia encontrada. Verifica a tua API Key.</p>';
                 }
             } catch (erro) {
-                grid.innerHTML = '<p>Erro ao carregar notícias.</p>';
+                grid.innerHTML = `<p>Erro: Ocorreu um problema ao ligar à API.</p>`;
+                console.error("Erro detalhado:", erro);
             }
         }
-
         carregarNoticias();
     </script>
 </body>
