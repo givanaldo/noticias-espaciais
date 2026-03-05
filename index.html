@@ -5,50 +5,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exploração Espacial - Notícias</title>
     <style>
-        /* CSS: Estilo Espacial */
+        /* 1. VARIÁVEIS DE CORES (O segredo do tema claro/escuro) */
+        :root {
+            --bg-color: #05070a;
+            --text-color: #e0e0e0;
+            --card-bg: #11141d;
+            --accent-color: #64dfdf;
+            --card-border: #222;
+        }
+
+        /* Cores para o Tema Claro */
+        .light-theme {
+            --bg-color: #f0f2f5;
+            --text-color: #1a1a1a;
+            --card-bg: #ffffff;
+            --accent-color: #0077b6;
+            --card-border: #ddd;
+        }
+
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #05070a;
-            color: #e0e0e0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             margin: 0;
             padding: 20px;
+            transition: background-color 0.3s, color 0.3s; /* Suaviza a troca de tema */
+        }
+
+        /* 2. BOTÃO DE TEMA */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            background-color: var(--accent-color);
+            color: #000;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 1000;
         }
 
         .container {
             max-width: 1000px;
             margin: 0 auto;
             text-align: center;
+            min-height: 80vh; /* Garante que o rodapé fique em baixo */
         }
 
         h1 {
-            color: #64dfdf;
+            color: var(--accent-color);
             font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-
-        .subtitle {
-            color: #888;
-            margin-bottom: 40px;
         }
 
         #news-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 25px;
+            margin-top: 40px;
         }
 
         .card {
-            background: #11141d;
+            background: var(--card-bg);
             border-radius: 15px;
             overflow: hidden;
-            border: 1px solid #222;
+            border: 1px solid var(--card-border);
             transition: 0.3s;
             text-align: left;
         }
 
         .card:hover {
             transform: translateY(-8px);
-            border-color: #64dfdf;
+            border-color: var(--accent-color);
         }
 
         .card img {
@@ -57,87 +86,79 @@
             object-fit: cover;
         }
 
-        .card-body {
-            padding: 20px;
-        }
-
-        .card-title {
-            font-size: 1.2rem;
-            color: #fff;
-            margin: 0 0 10px 0;
-            line-height: 1.4;
-        }
-
-        .card-text {
-            font-size: 0.9rem;
-            color: #aaa;
-            margin-bottom: 20px;
-        }
+        .card-body { padding: 20px; }
 
         .btn-link {
-            color: #64dfdf;
+            color: var(--accent-color);
             text-decoration: none;
             font-weight: bold;
-            font-size: 0.85rem;
-            border: 1px solid #64dfdf;
+            border: 1px solid var(--accent-color);
             padding: 8px 15px;
             border-radius: 5px;
-            transition: 0.3s;
         }
 
-        .btn-link:hover {
-            background: #64dfdf;
-            color: #000;
+        /* 3. ESTILO DO RODAPÉ */
+        footer {
+            margin-top: 50px;
+            padding: 20px;
+            border-top: 1px solid var(--card-border);
+            text-align: center;
+            font-size: 0.9rem;
+            color: #888;
         }
-
-        .loading { color: #64dfdf; font-style: italic; }
     </style>
 </head>
 <body>
 
+    <button class="theme-toggle" id="theme-btn">🌓 Alternar Tema</button>
+
     <div class="container">
         <h1>🌠 Astronomia Hoje</h1>
-        <p class="subtitle">As últimas notícias do universo em português</p>
+        <p>As últimas notícias do universo em português</p>
 
         <div id="news-grid">
-            <p class="loading">A procurar novidades nas estrelas...</p>
+            <p>A procurar novidades nas estrelas...</p>
         </div>
     </div>
 
+    <footer>
+        <p>&copy; 2024 - Criado por [Teu Nome] | Dados fornecidos por GNews API</p>
+    </footer>
+
     <script>
-        // CONFIGURAÇÃO: Coloca aqui a tua chave da GNews API
+        // LÓGICA DO TEMA
+        const themeBtn = document.getElementById('theme-btn');
+        themeBtn.addEventListener('click', () => {
+            document.body.classList.toggle('light-theme');
+        });
+
+        // LÓGICA DAS NOTÍCIAS (Mesma de antes, ajustando para as cores dinâmicas)
         const API_KEY = 'affc2a5fd1deb4ee42e51b90a767ac67'; 
-        const URL = `https://gnews.io/api/v4/search?q=astronomia OR "exploração espacial"&lang=pt&country=pt&max=9&apikey=${API_KEY}`;
+        const URL = `https://gnews.io/api/v4/search?q=astronomia&lang=pt&max=9&apikey=${API_KEY}`;
 
         async function carregarNoticias() {
             const grid = document.getElementById('news-grid');
-
             try {
                 const resposta = await fetch(URL);
                 const dados = await resposta.json();
 
-                if (dados.articles && dados.articles.length > 0) {
-                    grid.innerHTML = ''; // Limpa o aviso de carregamento
-
+                if (dados.articles) {
+                    grid.innerHTML = '';
                     dados.articles.forEach(artigo => {
-                        const template = `
+                        grid.innerHTML += `
                             <div class="card">
-                                <img src="${artigo.image}" alt="Imagem da notícia">
+                                <img src="${artigo.image}" alt="Notícia">
                                 <div class="card-body">
-                                    <h3 class="card-title">${artigo.title}</h3>
-                                    <p class="card-text">${artigo.description.substring(0, 120)}...</p>
+                                    <h3 style="color:var(--text-color)">${artigo.title}</h3>
+                                    <p style="color:#888">${artigo.description.substring(0, 100)}...</p>
                                     <a href="${artigo.url}" target="_blank" class="btn-link">LER MAIS</a>
                                 </div>
                             </div>
                         `;
-                        grid.innerHTML += template;
                     });
-                } else {
-                    grid.innerHTML = '<p>Nenhuma notícia encontrada no momento.</p>';
                 }
             } catch (erro) {
-                grid.innerHTML = '<p>Erro ao ligar ao servidor de notícias. Verifica a tua API Key.</p>';
-                console.error("Erro na API:", erro);
+                grid.innerHTML = '<p>Erro ao carregar notícias.</p>';
             }
         }
 
