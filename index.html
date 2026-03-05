@@ -3,182 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exploração Espacial - Notícias</title>
+    <title>Portal do Cosmo</title>
     <style>
-        /* 1. VARIÁVEIS DE CORES (O segredo do tema claro/escuro) */
         :root {
-            --bg-color: #05070a;
+            --bg-color: #0b0e14;
             --text-color: #e0e0e0;
-            --card-bg: #11141d;
-            --accent-color: #64dfdf;
-            --card-border: #222;
+            --accent: #4cc9f0;
+            --card-bg: #161b22;
         }
 
-        /* Cores para o Tema Claro */
         .light-theme {
             --bg-color: #f0f2f5;
             --text-color: #1a1a1a;
+            --accent: #0077b6;
             --card-bg: #ffffff;
-            --accent-color: #0077b6;
-            --card-border: #ddd;
         }
 
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
+            transition: 0.3s;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+        
+        header { text-align: center; padding: 40px 0; }
+        h1 { color: var(--accent); margin: 0; font-size: 2.5rem; }
+
+        .theme-btn {
+            position: fixed; top: 20px; right: 20px;
+            padding: 10px 15px; border-radius: 20px;
+            border: none; background: var(--accent);
+            cursor: pointer; font-weight: bold;
+        }
+
+        /* Destaque da NASA */
+        .nasa-card {
+            background: var(--card-bg);
+            border-radius: 15px;
             padding: 20px;
-            transition: background-color 0.3s, color 0.3s; /* Suaviza a troca de tema */
+            margin-bottom: 40px;
+            border: 2px solid var(--accent);
         }
 
-        /* 2. BOTÃO DE TEMA */
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 10px 15px;
-            background-color: var(--accent-color);
-            color: #000;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: bold;
-            z-index: 1000;
-        }
+        .nasa-card img { width: 100%; border-radius: 10px; max-height: 500px; object-fit: cover; }
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            text-align: center;
-            min-height: 80vh; /* Garante que o rodapé fique em baixo */
-        }
-
-        h1 {
-            color: var(--accent-color);
-            font-size: 2.5rem;
-        }
-
-        #news-grid {
+        /* Grelha de Notícias */
+        .news-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            margin-top: 40px;
+            gap: 20px;
         }
 
         .card {
             background: var(--card-bg);
-            border-radius: 15px;
+            border-radius: 12px;
             overflow: hidden;
-            border: 1px solid var(--card-border);
-            transition: 0.3s;
-            text-align: left;
+            border: 1px solid #333;
+            display: flex;
+            flex-direction: column;
         }
 
-        .card:hover {
-            transform: translateY(-8px);
-            border-color: var(--accent-color);
-        }
+        .card img { width: 100%; height: 180px; object-fit: cover; }
+        .card-content { padding: 15px; flex-grow: 1; }
+        
+        footer { text-align: center; padding: 40px; opacity: 0.6; font-size: 0.8rem; }
 
-        .card img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-        }
-
-        .card-body { padding: 20px; }
-
-        .btn-link {
-            color: var(--accent-color);
-            text-decoration: none;
-            font-weight: bold;
-            border: 1px solid var(--accent-color);
-            padding: 8px 15px;
-            border-radius: 5px;
-        }
-
-        /* 3. ESTILO DO RODAPÉ */
-        footer {
-            margin-top: 50px;
-            padding: 20px;
-            border-top: 1px solid var(--card-border);
-            text-align: center;
-            font-size: 0.9rem;
-            color: #888;
-        }
+        .error-msg { color: #ff4d4d; border: 1px solid #ff4d4d; padding: 10px; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-    <button class="theme-toggle" id="theme-btn">🌓 Alternar Tema</button>
+    <button class="theme-btn" onclick="toggleTheme()">🌓 Alternar Tema</button>
 
     <div class="container">
-        <h1>🌠 Astronomia Hoje</h1>
-        <p>As últimas notícias do universo em português</p>
+        <header>
+            <h1>🌠 Portal do Cosmo</h1>
+            <p>Exploração espacial em tempo real</p>
+        </header>
 
-        <div id="news-grid">
-            <p>A procurar novidades nas estrelas...</p>
+        <section id="nasa-section">
+            <div class="nasa-card">
+                <h2>Cena de Hoje na NASA</h2>
+                <div id="nasa-content">Carregando maravilhas do espaço...</div>
+            </div>
+        </section>
+
+        <h2>Últimos Lançamentos e Descobertas</h2>
+        <div id="news-grid" class="news-grid">
+            <p>A procurar notícias...</p>
         </div>
     </div>
 
     <footer>
-        <p>&copy; 2024 - Criado por [Teu Nome] | Dados fornecidos por GNews API</p>
+        <p>&copy; <span id="year"></span> - Criado por Givanaldo | Dados oficiais da NASA e Spaceflight API</p>
     </footer>
 
     <script>
-        // LÓGICA DO TEMA
-        const themeBtn = document.getElementById('theme-btn');
-        themeBtn.addEventListener('click', () => {
+        // 1. Alternar Tema
+        function toggleTheme() {
             document.body.classList.toggle('light-theme');
-        });
+        }
 
-        // LÓGICA DAS NOTÍCIAS (Mesma de antes, ajustando para as cores dinâmicas)
-        const API_KEY = 'affc2a5fd1deb4ee42e51b90a767ac67'; 
-        //const URL = `https://gnews.io/api/v4/search?q=astronomia&lang=pt&max=9&apikey=${API_KEY}`;
+        document.getElementById('year').textContent = new Date().getFullYear();
 
-        async function carregarNoticias() {
-            const grid = document.getElementById('news-grid');
-            
-            // 1. A tua URL original
-            const URL_ORIGINAL = `https://gnews.io/api/v4/search?q=astronomia&lang=pt&max=9&apikey=${API_KEY}`;
-            
-            // 2. Envolvemos a URL no serviço AllOrigins para evitar o erro de CORS
-            const URL_COM_PROXY = `https://api.allorigins.win/get?url=${encodeURIComponent(URL_ORIGINAL)}`;
-
+        // 2. Buscar Imagem da NASA (NASA APOD)
+        async function fetchNasa() {
+            const container = document.getElementById('nasa-content');
             try {
-                const resposta = await fetch(URL_COM_PROXY);
+                // Usamos 'DEMO_KEY' que é gratuita e funciona direto
+                const res = await fetch('https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY');
+                const data = await res.json();
                 
-                if (!resposta.ok) throw new Error('Erro na rede');
-
-                const dadosProxy = await resposta.json();
-                
-                // O AllOrigins devolve os dados dentro de um campo chamado 'contents' como texto
-                // Precisamos de transformar esse texto em JSON real
-                const dados = JSON.parse(dadosProxy.contents);
-
-                if (dados.articles && dados.articles.length > 0) {
-                    grid.innerHTML = '';
-                    dados.articles.forEach(artigo => {
-                        grid.innerHTML += `
-                            <div class="card">
-                                <img src="${artigo.image}" alt="Notícia">
-                                <div class="card-body">
-                                    <h3 style="color:var(--text-color)">${artigo.title}</h3>
-                                    <p style="color:#888">${artigo.description ? artigo.description.substring(0, 100) : ''}...</p>
-                                    <a href="${artigo.url}" target="_blank" class="btn-link">LER MAIS</a>
-                                </div>
-                            </div>
-                        `;
-                    });
-                } else {
-                    grid.innerHTML = '<p>Nenhuma notícia encontrada. Verifica a tua API Key.</p>';
-                }
-            } catch (erro) {
-                grid.innerHTML = `<p>Erro: Ocorreu um problema ao ligar à API.</p>`;
-                console.error("Erro detalhado:", erro);
+                container.innerHTML = `
+                    <h3>${data.title}</h3>
+                    <img src="${data.url}" alt="${data.title}">
+                    <p>${data.explanation.substring(0, 300)}...</p>
+                `;
+            } catch (e) {
+                container.innerHTML = "Não foi possível carregar a imagem da NASA.";
             }
         }
-        carregarNoticias();
+
+        // 3. Buscar Notícias Espaciais (CORS-Friendly)
+        async function fetchNews() {
+            const grid = document.getElementById('news-grid');
+            try {
+                // Esta API não exige chave e permite CORS total
+                const res = await fetch('https://api.spaceflightnewsapi.net/v4/articles/?limit=6');
+                const data = await res.json();
+                
+                grid.innerHTML = '';
+                data.results.forEach(item => {
+                    grid.innerHTML += `
+                        <div class="card">
+                            <img src="${item.image_url}" alt="Notícia">
+                            <div class="card-content">
+                                <h3>${item.title}</h3>
+                                <p>${item.summary.substring(0, 100)}...</p>
+                                <a href="${item.url}" target="_blank" style="color:var(--accent); font-weight:bold; text-decoration:none;">LER MAIS</a>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (e) {
+                grid.innerHTML = "<p class='error-msg'>Erro ao carregar notícias. Tenta desativar bloqueadores de anúncios.</p>";
+            }
+        }
+
+        // Iniciar
+        fetchNasa();
+        fetchNews();
     </script>
 </body>
 </html>
